@@ -1,22 +1,19 @@
-﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using NUnit.Framework;
 using TodoApi;
-using Xunit;
 
-
-namespace TodoApiIntegrationTest
+namespace IntegrationTests
 {
-    public class IntegrationTest 
+    [TestFixture]
+    public class IntegrationTests
     {
         private readonly HttpClient _client;
-
-        public IntegrationTest()
+        public IntegrationTests()
         {
             var server = new TestServer(new WebHostBuilder().UseEnvironment("Development").UseStartup<Startup>());
             _client = server.CreateClient();
@@ -29,43 +26,30 @@ namespace TodoApiIntegrationTest
             var response = await _client.SendAsync(request);
             return response;
         }
-        
-        [Fact]
-        public async Task Test_Get_All()
+
+        [Test]
+        public async Task GetMethod_return200Status()
         {
             var response = await _client.GetAsync("/api/todo");
 
             var responseBody = await response.Content.ReadAsStringAsync();
 
             response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        }
-    
-
-        [Theory]
-        [InlineData("GET")]
-        public async Task CallGetMethod_return200Status(string method)
-        {
-            var response = await HttpResponseMessage(method);
-
-            response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
-        [Theory]
-        [InlineData("POST")]
-        public async Task CallPostMethod_return201Status(string method) //, string method, string name, string isComplete
+        [Test]
+        public async Task PostMethod_return201Status() //, string method, string name, string isComplete
         {
             var response = await _client.PostAsync("/api/todo",
                 new StringContent(@"{""name"":""walk dog"",""isComplete"":true}", Encoding.UTF8, "application/json"));  // HttpResponseMessage(method);
 
             response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         }
 
-        [Theory]
-        [InlineData("PUT")]
-        public async Task CallPutMethod_return204Status(string method) //, string method, string name, string isComplete
+        [Test]
+        public async Task PutMethod_return204Status() //, string method, string name, string isComplete
         {
             var response1 = await _client.PostAsync("/api/todo",
                 new StringContent(@"{""name"":""walk dog"",""isComplete"":true}", Encoding.UTF8, "application/json"));
@@ -74,21 +58,20 @@ namespace TodoApiIntegrationTest
                 new StringContent(@"{""id"":2,""name"":""feed fish"",""isComplete"":true}", Encoding.UTF8, "application/json"));  // HttpResponseMessage(method);
 
             response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        [Theory]
-        [InlineData("DELETE")]
-        public async Task CallDeleteMethod_return204Status(string method) //, string method, string name, string isComplete
+        [Test]
+        public async Task CallDeleteMethod_return204Status() //, string method, string name, string isComplete
         {
             var response1 = await _client.DeleteAsync("/api/todo/1");
 
             response1.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.NoContent, response1.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NoContent, response1.StatusCode);
 
             var response2 = await _client.DeleteAsync("/api/todo/1");
-            
-            Assert.Equal(HttpStatusCode.NotFound, response2.StatusCode);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response2.StatusCode);
         }
     }
 }
