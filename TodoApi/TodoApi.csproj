@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <StartupObject>TodoApi.Program</StartupObject>
+    <UserSecretsId>fe09bea0-a453-4e9d-beed-4579610c0e6b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
